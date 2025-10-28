@@ -1,0 +1,125 @@
+#include <iostream>
+#include <cstdlib>   
+#include <ctime>     
+#include <chrono>    
+using namespace std;
+using namespace std::chrono;
+
+
+int bubble_sort_count(int arr[], int n) {
+    int comparisons = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            comparisons++;
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+    }
+    return comparisons;
+}
+
+
+int selection_sort_count(int arr[], int n) {
+    int comparisons = 0;
+    for (int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+        for (int j = i + 1; j < n; j++) {
+            comparisons++;
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        swap(arr[i], arr[minIndex]);
+    }
+    return comparisons;
+}
+
+
+int insertion_sort_count(int arr[], int n) {
+    int comparisons = 0;
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0) {
+            comparisons++;
+            if (arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            else {
+                break;
+            }
+        }
+        arr[j + 1] = key;
+    }
+    return comparisons;
+}
+
+
+void generate_random_array(int arr[], int n) {
+    for (int i = 0; i < n; i++)
+        arr[i] = rand() % 1000;
+}
+
+
+void generate_sorted_array(int arr[], int n) {
+    for (int i = 0; i < n; i++)
+        arr[i] = i;
+}
+
+
+void generate_reverse_array(int arr[], int n) {
+    for (int i = 0; i < n; i++)
+        arr[i] = n - i;
+}
+
+void test_comparisons() {
+    srand(time(0));
+
+    cout << "n, Type, Algorithm, Comparisons, Time(ms)\n";
+
+    for (int n = 1; n <= 30; n++) {
+        int arr[1000];
+
+     
+        string types[] = { "Random", "Sorted", "Reversed" };
+
+        for (int t = 0; t < 3; t++) {
+            if (types[t] == "Random") generate_random_array(arr, n);
+            else if (types[t] == "Sorted") generate_sorted_array(arr, n);
+            else generate_reverse_array(arr, n);
+
+            int temp[1000];
+
+           
+            copy(arr, arr + n, temp);
+            auto start = high_resolution_clock::now();
+            int comp = bubble_sort_count(temp, n);
+            auto end = high_resolution_clock::now();
+            double time_ms = duration<double, milli>(end - start).count();
+            cout << n << ", " << types[t] << ", Bubble, " << comp << ", " << time_ms << endl;
+
+          
+            copy(arr, arr + n, temp);
+            start = high_resolution_clock::now();
+            comp = selection_sort_count(temp, n);
+            end = high_resolution_clock::now();
+            time_ms = duration<double, milli>(end - start).count();
+            cout << n << ", " << types[t] << ", Selection, " << comp << ", " << time_ms << endl;
+
+          
+            copy(arr, arr + n, temp);
+            start = high_resolution_clock::now();
+            comp = insertion_sort_count(temp, n);
+            end = high_resolution_clock::now();
+            time_ms = duration<double, milli>(end - start).count();
+            cout << n << ", " << types[t] << ", Insertion, " << comp << ", " << time_ms << endl;
+        }
+    }
+}
+
+int main() {
+    test_comparisons();
+    return 0;
+}
