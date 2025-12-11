@@ -1,0 +1,112 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class Shop {
+private:
+    int budget;
+    int n;
+    vector<string> names;
+    vector<int> prices;
+
+public:
+    void inputItems() {
+        cout << "Enter your budget: ";
+        cin >> budget;
+
+        cout << "Enter number of items: ";
+        cin >> n;
+
+        names.resize(n);
+        prices.resize(n);
+
+        for (int i = 0; i < n; i++) {
+            cout << "Enter item " << i + 1 << " name: ";
+            cin >> names[i];
+
+            cout << "Enter price of " << names[i] << ": ";
+            cin >> prices[i];
+        }
+    }
+
+    void greedy() {
+        cout << "\n--- Greedy Algorithm Solution ---\n";
+
+        vector<int> idx(n);
+        for (int i = 0; i < n; i++)
+            idx[i] = i;
+
+        sort(idx.begin(), idx.end(), [&](int a, int b) {
+            return prices[a] < prices[b];
+            });
+
+        int remaining = budget;
+
+        cout << "Items selected:\n";
+        for (int i : idx) {
+            if (prices[i] <= remaining) {
+                cout << names[i] << " (Price: " << prices[i] << ")\n";
+                remaining -= prices[i];
+            }
+        }
+
+        cout << "Remaining budget after greedy: " << remaining << "\n";
+    }
+
+    void dynamic() {
+        cout << "\n--- Dynamic Programming Solution ---\n";
+
+        int W = budget;
+        int N = n;
+
+        vector<int> weights = prices;
+        vector<int> values = prices;
+
+      
+        vector<vector<int>> dp(N + 1, vector<int>(W + 1, 0));
+
+        for (int i = 1; i <= N; i++) {
+            for (int w = 0; w <= W; w++) {
+                dp[i][w] = dp[i - 1][w];
+                if (w >= weights[i - 1]) {
+                    dp[i][w] = max(
+                        dp[i][w],
+                        values[i - 1] + dp[i - 1][w - weights[i - 1]]
+                    );
+                }
+            }
+        }
+
+        cout << "Maximum total price within budget: " << dp[N][W] << "\n";
+
+        int w = W;
+        vector<int> chosen;
+
+        for (int i = N; i > 0; i--) {
+            if (dp[i][w] != dp[i - 1][w]) {
+                chosen.push_back(i - 1);
+                w -= weights[i - 1];
+            }
+        }
+
+        if (chosen.empty()) {
+            cout << "No items selected by DP.\n";
+        }
+        else {
+            cout << "Items chosen by DP:\n";
+            for (int i = chosen.size() - 1; i >= 0; i--) {
+                cout << names[chosen[i]] << " (Price: " << prices[chosen[i]] << ")\n";
+            }
+        }
+    }
+};
+
+
+int main() {
+    Shop S;
+    S.inputItems();
+    S.greedy();
+    S.dynamic();
+    return 0;
+}
