@@ -1,0 +1,121 @@
+
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+int numster, ballstack, colnum, numem;
+vector<vector<int>> stacks;
+
+void gamesets() {
+    cout << "Enter number of stacks: ";
+    cin >> numster;
+
+    cout << "Enter number of balls per stack: ";
+    cin >> ballstack;
+
+    cout << "Enter number of colors: ";
+    cin >> colnum;
+
+    cout << "Enter number of empty stacks: ";
+    cin >> numem;
+}
+
+void game() {
+    stacks.resize(numster);
+
+    cout << "\nEnter the balls in each stack from bottom to top:\n";
+    for (int i = 0; i < numster; i++) {
+        cout << "Stack " << i << " (" << ballstack << " balls or empty):\n";
+        int count;
+        cout << "How many balls in this stack? ";
+        cin >> count;
+
+        for (int j = 0; j < count; j++) {
+            int color;
+            cout << "Ball " << j + 1 << ": ";
+            cin >> color;
+            stacks[i].push_back(color);
+        }
+    }
+}
+
+void pstack() {
+    cout << "\n------ CURRENT STACKS ------\n";
+    for (int i = 0; i < numster; i++) {
+        cout << "Stack " << i << ": ";
+        for (int b : stacks[i]) {
+            cout << b << " ";
+        }
+        cout << endl;
+    }
+    cout << "-----------------------------\n";
+}
+
+bool dfssolve() {
+    for (int i = 0; i < numster; i++) {
+        if (stacks[i].size() == 0) continue;
+        int color = stacks[i][0];
+        for (int c : stacks[i]) {
+            if (c != color) return false;
+        }
+    }
+    return true;
+}
+
+bool dfs(int depth, int maxDepth) {
+    if (dfssolve()) 
+        return true;
+    if (depth > maxDepth) 
+        return false;
+
+    for (int from = 0; from < numster; from++) {
+        if (stacks[from].empty()) continue;
+
+        int ball = stacks[from].back();
+
+        for (int to = 0; to < numster; to++) {
+            if (from == to) continue;
+
+            if (stacks[to].size() < ballstack &&
+                (stacks[to].empty() || stacks[to].back() == ball)) {
+
+                stacks[from].pop_back();
+                stacks[to].push_back(ball);
+
+                cout << "Move ball " << ball << " from stack " << from
+                    << " to stack " << to << endl;
+
+                if (dfs(depth + 1, maxDepth))
+                    return true;
+
+                stacks[to].pop_back();
+                stacks[from].push_back(ball);
+            }
+        }
+    }
+    return false;
+}
+
+void solveBallStrings() {
+    cout << "\nSolving using DFS...\n";
+
+    if (dfs(0, 15))  
+        cout << "\nSolved!\n";
+    else
+        cout << "\nNo solution found (try smaller input).\n";
+}
+
+int main() {
+    gamesets();
+    game();
+    pstack();
+
+    solveBallStrings();
+
+    cout << "\nFinal stacks:\n";
+    pstack();
+
+    return 0;
+}
+
